@@ -16,6 +16,7 @@ class Kakao {
         this.clientId = process.env.KAKAO_CLIENT_ID;
         this.clientSecret = process.env.KAKAO_SECRET_KEY;
         this.redirectUri = process.env.KAKAO_REDIRECT_URI;
+        this.userInfoUrl = process.env.KAKAO_USERINFO_URI;
         this.code = code;
     }
 }
@@ -41,13 +42,34 @@ module.exports.Init = () => {
     }
 }
 
-module.exports.getKakaoAccessToken = async (code) => {
+module.exports.getKakaoAccessToken = async (options) => {
     try {
-        const kakao = new Kakao(code);
-        const token = await getAccessToken(kakao);
+        const token = await getAccessToken(options);
         return token;
     } catch(error) {
-        console.log("loginKakao::kakaoLogin::error", error);
+        console.log("loginKakao::getKakaoAccessToken::error", error);
+    }
+}
+
+module.exports.getKakaoUserInfo = async (url, accessToken) => {
+    try {
+        const userInfo = await getUserInfo(url, accessToken);
+        return userInfo;
+    } catch(error) {
+        console.log("loginKakao::getKakaoUserInfo::error", error);
+    }
+}
+
+module.exports.getOption = (coperation, code) => {
+    switch(coperation){
+        case 'kakao':
+            return new Kakao(code);
+        case 'google':
+            // return new Google(code);
+        break;
+        case 'naver':
+            // return new Naver(code);
+        break;
     }
 }
 
@@ -56,7 +78,7 @@ const getAccessToken = async (options) => {
         return await fetch(options.url, {
             method: 'POST',
             headers: {
-                'content-type':'application/x-www-form-urlencoded;charset=utf-8'
+                'Content-type':'application/x-www-form-urlencoded;charset=utf-8'
             },
             body: qs.stringify({
                 grant_type: 'authorization_code', // 특정 스트링
@@ -68,5 +90,19 @@ const getAccessToken = async (options) => {
         }).then(res => res.json());
     } catch(error) {
         console.log("loginKakao::getAccessToken::error", error);
+    }
+};
+
+const getUserInfo = async (url, accessToken) => {
+    try {
+        return await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+                'Authorization': `Bearer ${accessToken}`
+            }
+        }).then(res => res.json());
+    } catch(error) {
+        console.log("loginKakao::getUserInfo::error", error);
     }
 };
