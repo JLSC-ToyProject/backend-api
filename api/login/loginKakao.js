@@ -53,7 +53,11 @@ module.exports.getKakaoAccessToken = async (options) => {
 
 module.exports.getKakaoUserInfo = async (url, accessToken) => {
     try {
-        const userInfo = await getUserInfo(url, accessToken);
+        let userUrl = url;
+        if (!userUrl) {
+            userUrl = process.env.KAKAO_USERINFO_URI;
+        }
+        const userInfo = await getUserInfo(userUrl, accessToken);
         return userInfo;
     } catch(error) {
         console.log("loginKakao::getKakaoUserInfo::error", error);
