@@ -1,6 +1,14 @@
 OPEN_API_KEY_ENCODING=<인코딩된 개인 서비스 키>
 OPEN_API_KEY_DECODING=<디코딩된 개인 서비스 키>
 OPEN_API_SERVICE_URL=http://openapi.molit.go.kr/OpenAPI_ToolInstallPackage/service/rest/RTMSOBJSvc/getRTMSDataSvcAptTradeDev
+OPEN_API_CODE_URL=https://infuser.odcloud.kr/oas/docs?namespace=15063993/v1
+
+MYSQL_HOST=<MYSQL host>
+MYSQL_PORT=<MYSQL port>
+MYSQL_USER=<MYSQL user>
+MYSQL_PASSWORD=<MYSQL password>
+MYSQL_DATABASE=<MYSQL database>
+
 KAKAO_TOKEN_URI=https://kauth.kakao.com/oauth/token
 KAKAO_USERINFO_URI=https://kapi.kakao.com/v2/user/me
 KAKAO_REDIRECT_URI=<카카오 개인 앱의 인가 코드가 리다이렉트된 URL>
