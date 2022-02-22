@@ -20,39 +20,13 @@ const aprtApiUrl = process.env.OPEN_API_APARTMENT_URL;
 const codeApiUrl = process.env.OPEN_API_CODE_URL;
 const apiKeyEncoding = process.env.OPEN_API_KEY_ENCODING;
 
-const getTotalCount = (page, cnt , lawd,  ymd) => {
+const getApartment = async (page, cnt , lawd,  ymd) => {
     return new Promise((resolve, reject) => {
         let queryParams = '?serviceKey=' + apiKeyEncoding+ 
         '&pageNo=' + page
         + '&numOfRows=' +cnt   
         + '&LAWD_CD=' + lawd
         + '&DEAL_YMD=' + ymd;
-
-        let totalCnt =0;
-        request({
-            url: aprtApiUrl + queryParams,
-            method: 'GET'
-        }, function (error, response, body) {
-            
-            let data = xmlToJson(body);
-            totalCnt =data.response.body.totalCount._text;
-            resolve(totalCnt);
-        });
-    })
-}
-
-
-const getApartment = async (page, cnt , lawd,  ymd) => {
-    return new Promise((resolve, reject) => {
-        let pageNo = page;
-        let numOfRows= cnt;
-        let lawdCd = lawd;
-        let dealYmd = ymd;
-        let queryParams = '?serviceKey=' + apiKeyEncoding+ 
-        '&pageNo=' + pageNo
-        + '&numOfRows=' +numOfRows   
-        + '&LAWD_CD=' + lawdCd
-        + '&DEAL_YMD=' + dealYmd;
 
 
         request({
@@ -63,25 +37,26 @@ const getApartment = async (page, cnt , lawd,  ymd) => {
                 reject(err);
             }
             let data = xmlToJson(body);
-            resolve(data.response.body.items);
+            resolve(data);
         });
     });
 }
 
-router.get('/test', async (req, res) => {
+router.get('/', async (req, res) => {
     try{
         let pageNo = '1';
         let numOfRows= '1';
         let lawdCd = '11110';
         let dealYmd = '202201';
         
-        let results = await getTotalCount(pageNo, numOfRows, lawdCd, dealYmd);
+        let results = await getApartment(pageNo, numOfRows, lawdCd, dealYmd);
         //console.log("totalCount " + results);
-
-        results = await getApartment(pageNo, results, lawdCd, dealYmd);
-
+        let totalCnt =results.response.body.totalCount._text; //.response.body.totalCount._text;
+        console.log("totalCnt" + totalCnt);
+    
+        results = await getApartment(pageNo, totalCnt, lawdCd, dealYmd);
         
-        results.item.forEach((item)=> {
+        results.response.body.items.item.forEach((item)=> {
             const data= {
                 'transactionAmount': item.거래금액._text,  
                 'constructionYear': item.건축년도._text,     
@@ -98,9 +73,9 @@ router.get('/test', async (req, res) => {
                 'number':item.지번._text,       
                 'floor':item.층._text  
             };
-            
+            console.log(data); 
             insertApart(data);
-        })
+        }) 
         return res.json({data: results});
     }catch(err) {
         console.log(err);
