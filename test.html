@@ -1,0 +1,122 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<title>Kakao 지도 시작하기</title>
+</head>
+<body>
+    <div id="content">
+
+        <div id="map" style="width:900px;height:750px;"></div>
+        <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=c677aa7e238e2c551cbcfde8c3dcef6c&libraries=services,clusterer,drawing"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    </div>
+    <div id="priceList">
+        <div id="aprtmentName">아파트명</div>
+         
+        <div id="apartTradeList">가격보기</div>
+          
+
+        </div>
+
+    </div>
+
+</body>
+</html>
+
+
+<script>
+    var container = document.getElementById('map'); //지도를 담을 영역의 DOM 레퍼런스
+    var options = { //지도를 생성할 때 필요한 기본 옵션
+	center: new kakao.maps.LatLng(37.5667790987175, 127.078414071305), //지도의 중심좌표.
+	level: 10 //지도의 레벨(확대, 축소 정도)
+};
+
+
+    var map = new kakao.maps.Map(container, options); //지도 생성 및 객체 리턴
+
+ 
+    
+    // 마커 클러스터러를 생성합니다 
+    var clusterer = new kakao.maps.MarkerClusterer({
+        map: map, // 마커들을 클러스터로 관리하고 표시할 지도 객체 
+        averageCenter: true, // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정 
+        minLevel:5 // 클러스터 할 최소 지도 레벨 
+    });
+
+	$.get("/apart/getCurrentYearTrade", function(data) {
+        // 데이터에서 좌표 값을 가지고 마커를 표시합니다
+        // 마커 클러스터러로 관리할 마커 객체는 생성할 때 지도 객체를 설정하지 않습니다
+    
+        var arr = data; //i.aprtmentName // 인포윈도우에 표시할 내용
+    
+        var markers =  data.map(function(i, position) {
+            var marker =  new kakao.maps.Marker({
+                position : new kakao.maps.LatLng(i.ylocation, i.xlocation),
+            });
+            
+            kakao.maps.event.addListener(marker,'click',function(){
+                var location = [i.xlocation , i.ylocation];
+                
+                //아파트 거래내역리스트 
+                getTradeApartList(location);
+            });
+
+            return marker;
+
+        });
+
+        // // 인포윈도우를 생성합니다
+        // var infowindow = new kakao.maps.InfoWindow({
+        //     content : iwContent
+        // });
+
+        // 클러스터러에 마커들을 추가합니다
+        clusterer.addMarkers(markers);
+    });
+
+    function getTradeApartList(location){
+   
+        $.post("/apart/getTradeApartList",
+        {xlocation : location[0],
+        ylocation : location[1]},
+
+        function(data){
+            // console.log(data.length);
+        
+            $("#aprtmentName").html(data[0]["aprtmentName"])
+
+           var html ='<table style="width:100%; border : 1px solid red; border-collapse : collapse; "><th>년</th><th>월</th><th>일</th><th>가격</th><th>층</th>';
+            for(var i of data){  
+
+                html += `<tr><td>${i["dealYear"]}</td><td>${i["dealMonth"]}</td><td>${i["dealDay"]}</td><td>${i["dealAmount"]}</td><td>${i["floor"]}</td></tr>`
+           } 
+           html+= "</table>"
+            // $("#priceList >div").text(`
+            // ${data.dealYear} ${data.Month} ${data.areaForExUse}
+            // ${data.fllor} ${data.dealAmount}
+            // `);
+
+            $("#apartTradeList").html(html)
+        });
+    }
+
+</script>
+
+<style>
+    #content{
+        float:left;
+        width:50%;
+
+    }
+
+    #priceList{
+
+        float:right;
+        width:50%;
+        
+    }
+
+</style>
