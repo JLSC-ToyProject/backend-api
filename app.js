@@ -27,15 +27,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+
 app.use('/', indexRouter);
 app.use('/login', loginRouter);
 app.use('/apart',apartRouter);
 app.use('/api',apiRouter);
-
-
-router.get('/test', function(req, res, next) {
-  res.render('test.html', { title: 'Express' });
-});
 
 
 

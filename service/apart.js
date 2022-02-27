@@ -2,7 +2,7 @@ const {ApartmentPrice , Apartment,sequelize} = require('../models');
 
 module.exports.getCurrentYearTrade = async ()=>{
 
-    var query = "SELECT A.* FROM apartmentprices A WHERE XLOCATION IS NOT NULL AND DEALYEAR='2021' GROUP BY CONCAT(APRTMENTNAME, DONG ,ADDRESS,XLOCATION,YLOCATION)";
+    var query = "SELECT A.* FROM ApartmentPrices A WHERE XLOCATION IS NOT NULL AND DEALYEAR='2021' GROUP BY CONCAT(APRTMENTNAME, DONG ,ADDRESS,XLOCATION,YLOCATION)";
   
     try{
         var result = await sequelize.query(query , { type:sequelize.QueryTypes.SELECT})
