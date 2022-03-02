@@ -5,9 +5,22 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const indexRouter = require('./routes/index');
 const loginRouter = require('./routes/login');
+
+const apartRouter = require('./controller/apart');
+const apiRouter = require('./api');
+const { sequelize} = require('./models');
+
 const apartmentRouter = require('./routes/apartment');
 const areaRouter = require('./routes/area');
+
 const app = express();
+
+sequelize.sync({})
+.then(()=>{console.log('데이터베이스 성공')
+})
+.catch((error)=>{
+    console.log('에러')
+});
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -18,8 +31,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+
 app.use('/', indexRouter);
 app.use('/login', loginRouter);
+
+app.use('/apart',apartRouter);
+app.use('/api',apiRouter);
+
 app.use('/apartment', apartmentRouter);
 app.use('/area', areaRouter);
 
