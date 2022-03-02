@@ -5,9 +5,13 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const indexRouter = require('./routes/index');
 const loginRouter = require('./routes/login');
+
 const apartRouter = require('./controller/apart');
 const apiRouter = require('./api');
 const { sequelize} = require('./models');
+
+const apartmentRouter = require('./routes/apartment');
+const areaRouter = require('./routes/area');
 
 const app = express();
 
@@ -30,10 +34,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/login', loginRouter);
+
 app.use('/apart',apartRouter);
 app.use('/api',apiRouter);
 
-
+app.use('/apartment', apartmentRouter);
+app.use('/area', areaRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -49,6 +55,11 @@ app.use(function(err, req, res, next) {
     // render the error page
     res.status(err.status || 500);
     res.render('error.html');
+});
+
+app.set('port', 3000);
+app.listen(app.get('port'), () => {
+  console.log(app.get('port'), '번 포트에서 대기 중');
 });
 
 module.exports = app;
