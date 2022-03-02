@@ -32,7 +32,7 @@
     "qs": "^6.5.3",
     "request": "^2.88.2",
     "xml-js": "^1.6.11",
-    "sequelize-cli": "^6.4.1"
+    "sequelize-cli": "^6.4.1",
     "sequelize": "^6.16.2",
     "xml-js": "^1.6.11"
   }
