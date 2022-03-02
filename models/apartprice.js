@@ -14,22 +14,22 @@ module.exports = class ApartmentPrice extends Sequelize.Model {
         // unique: true,
       },//거래금액
       dealAmount :{
-        type: Sequelize.STRING(50),
+        type: Sequelize.INTEGER(11),
         allowNull: false,
       },//계약년 
       dealYear: {
-        type: Sequelize.STRING(5),
+        type: Sequelize.INTEGER(5),
 
       },//계약월  
       dealMonth: {
-        type: Sequelize.STRING(5),
+        type: Sequelize.INTEGER(5),
 
       },//계약일
       dealDay: {
-        type: Sequelize.STRING(5),
+        type: Sequelize.INTEGER(5),
       },//건축년도
       buildYear: {
-        type: Sequelize.STRING(5),
+        type: Sequelize.INTEGER(5),
       },
       //전용면적
       areaForExUse:{type: Sequelize.STRING(50),},
