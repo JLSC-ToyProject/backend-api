@@ -51,7 +51,7 @@ module.exports.getTrade = async (lawdCdNm , yymmList )=>{
 
 
             ApartmentPrice.create({
-                dealAmount: result[i]['거래금액']['_text'].trim(),         //거래금액
+                dealAmount: Number(result[i]['거래금액']['_text'].trim().replaceAll(',','')),         //거래금액
                 buildYear : result[i]['건축년도']['_text']  ,             //건축년도
                 dong : result[i]['법정동']['_text']  ,                   //법정동
                 aprtmentName : result[i]['아파트']['_text']  ,           //아파트명
