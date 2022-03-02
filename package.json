@@ -26,10 +26,15 @@
     "express": "^4.17.2",
     "http-errors": "~1.6.3",
     "morgan": "~1.9.1",
+<<<<<<< HEAD
+    "mysql": "^2.18.1",
+=======
+>>>>>>> d1da9701a1172d3ed79d3c5a15ff9803de27c7ed
     "mysql2": "^2.3.3",
     "node-fetch": "^2.6.7",
     "qs": "^6.5.3",
     "request": "^2.88.2",
+    "sequelize": "^6.16.2",
     "xml-js": "^1.6.11"
   }
 }
