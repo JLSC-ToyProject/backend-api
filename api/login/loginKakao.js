@@ -51,9 +51,27 @@ module.exports.getKakaoAccessToken = async (options) => {
     }
 }
 
+module.exports.checkKakaoAccessToken = async (url, accessToken) => {
+    try {
+        let userUrl = url;
+        if (!userUrl) {
+            userUrl = process.env.KAKAO_ACCESS_TOKEN_INFO;
+        }
+        console.log("checkKakaoAccessToken", userUrl, accessToken)
+        const tokenInfo = await checkAccessToken(userUrl, accessToken);
+        return tokenInfo;
+    } catch(error) {
+        console.log("loginKakao::checkKakaoAccessToken::error", error);
+    }
+}
+
 module.exports.getKakaoUserInfo = async (url, accessToken) => {
     try {
-        const userInfo = await getUserInfo(url, accessToken);
+        let userUrl = url;
+        if (!userUrl) {
+            userUrl = process.env.KAKAO_USERINFO_URI;
+        }
+        const userInfo = await getUserInfo(userUrl, accessToken);
         return userInfo;
     } catch(error) {
         console.log("loginKakao::getKakaoUserInfo::error", error);
@@ -90,6 +108,20 @@ const getAccessToken = async (options) => {
         }).then(res => res.json());
     } catch(error) {
         console.log("loginKakao::getAccessToken::error", error);
+    }
+};
+
+const checkAccessToken = async (url, accessToken) => {
+    try {
+        return await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+                'Authorization': `Bearer ${accessToken}`
+            }
+        }).then(res => res.json());
+    } catch(error) {
+        console.log("loginKakao::getUserInfo::error", error);
     }
 };
 

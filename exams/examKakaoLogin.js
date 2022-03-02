@@ -4,10 +4,10 @@
  * @author shjang
  */
 
-const Init = require('../api/login/loginKakao.js').Init;
-const getOption = require('../api/login/loginKakao.js').getOption;
-const getKakaoAccessToken = require('../api/login/loginKakao.js').getKakaoAccessToken;
-const getKakaoUserInfo = require('../api/login/loginKakao.js').getKakaoUserInfo;
+const getOption             = require('../api/login/loginKakao.js').getOption;
+const getKakaoAccessToken   = require('../api/login/loginKakao.js').getKakaoAccessToken;
+const getKakaoUserInfo      = require('../api/login/loginKakao.js').getKakaoUserInfo;
+const checkKakaoAccessToken = require('../api/login/loginKakao.js').checkKakaoAccessToken;
 
 const RunProc = async () => {
     try {
@@ -39,6 +39,17 @@ const RunProc = async () => {
          * }
          */
         console.log("RunProc::userInfo", userInfo);
+        const tokenInfo = await checkKakaoAccessToken('', token.access_token);
+        /**
+         * @notice tokenInfo 결과 값 예상 모습
+         * id: 2120390969,
+         * expiresInMillis: 21599894,
+         * expires_in: 21599,
+         * app_id: 704098,
+         * appId: 704098
+         * id: 2120390969,
+         */
+        console.log("RunProc::tokenInfo", tokenInfo);
 
     } catch(error) {
         console.log("RunProc::error", error);

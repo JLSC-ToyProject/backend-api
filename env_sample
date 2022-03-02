@@ -10,6 +10,7 @@ MYSQL_PASSWORD=<MYSQL password>
 MYSQL_DATABASE=<MYSQL database>
 
 KAKAO_TOKEN_URI=https://kauth.kakao.com/oauth/token
+KAKAO_ACCESS_TOKEN_INFO=https://kapi.kakao.com/v1/user/access_token_info
 KAKAO_USERINFO_URI=https://kapi.kakao.com/v2/user/me
 KAKAO_REDIRECT_URI=<카카오 개인 앱의 인가 코드가 리다이렉트된 URL>
 KAKAO_CLIENT_ID=<카카오 개인 앱 REST API>
