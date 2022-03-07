@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const indexRouter = require('./routes/index');
 const loginRouter = require('./routes/login');
+const userRouter = require('./routes/user');
 
 const apartRouter = require('./controller/apart');
 const apiRouter = require('./api');
@@ -34,6 +35,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/login', loginRouter);
+app.use('/user', userRouter);
 
 app.use('/apart',apartRouter);
 app.use('/api',apiRouter);
@@ -55,11 +57,6 @@ app.use(function(err, req, res, next) {
     // render the error page
     res.status(err.status || 500);
     res.render('error.html');
-});
-
-app.set('port', 3000);
-app.listen(app.get('port'), () => {
-  console.log(app.get('port'), '번 포트에서 대기 중');
 });
 
 module.exports = app;

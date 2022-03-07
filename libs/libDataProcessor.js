@@ -1,6 +1,6 @@
 /**
  * @file libDataProcessor.js
- * @notice 데이터 가공에 필요한 library 코드
+ * @notice 데이터 가공에 필요한 library
  * @author shjang
  */
 

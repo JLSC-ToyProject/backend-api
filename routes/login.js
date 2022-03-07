@@ -1,3 +1,8 @@
+/**
+ * @file routes/login.js
+ * @author shjang
+ */
+
 const express = require('express');
 const router = express.Router();
 const getOption = require('../api/login/loginKakao.js').getOption;
@@ -10,6 +15,7 @@ router.get('/', function(req, res) {
     res.send(`respond with a login`);
 });
 
+// 사용자 access token 획득
 router.post('/user/token', async (req, res) => {
     const coperation = req.body.coperation;
     const code = req.body.code;
@@ -21,6 +27,7 @@ router.post('/user/token', async (req, res) => {
     res.send(token);
 });
 
+// 사용자 info 획득
 router.post('/user/info', async (req, res) => {
     const coperation = req.body.coperation;
     const accessToken = req.body.token;
