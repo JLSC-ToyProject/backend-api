@@ -23,16 +23,28 @@ const apiKeyEncoding = process.env.OPEN_API_KEY_ENCODING;
 
 const apartItem = require('../models/apartItem.js');
 const { resolve } = require('path');
+const { off } = require('process');
 
+let lawdCd = '11110'; // 종로구
+let dealYmd = '202202';
 let pageNo = '1';
 let numOfRows= '1';
 let today = new Date();  
 let year = today.getFullYear();
 let month = today.getMonth(); // 원래 +1 해야함.
-   
+
+let pageLimit = 20; // 페이지 범위
+let totalCnt  =0;
+let totalPage =0;
+
+/**
+ * 기본 시세 정보 리스트
+ * 1. 지역 / 아파트  / 날짜(현재 년월 - 202202)  
+ */
 router.get('/', async (req, res) => {
     try{
-        let {year, month, courtBuildingStateCode, courtBuildingCityCode, apartment, serialNumber} = req.body; 
+        let {year, month, courtBuildingStateCode, courtBuildingCityCode, 
+            apartment, serialNumber, amountTo, amountFrom, orderBy} = req.body; 
           
         if(!year) year = -1;
         if(!month) month = -1;
@@ -40,6 +52,9 @@ router.get('/', async (req, res) => {
         if(!courtBuildingCityCode) courtBuildingCityCode = -1; 
         if(!apartment) apartment = null;
         if(!serialNumber) serialNumber= -1;
+        if(!amountTo) amountTo =  Number.MAX_VALUE;
+        if(!amountFrom) amountFrom = 1;
+        if(!orderBy) orderBy = "desc";
 
         const data ={
             'year' : year,
@@ -47,12 +62,79 @@ router.get('/', async (req, res) => {
             'courtBuildingStateCode' : courtBuildingStateCode,
             'courtBuildingCityCode' : courtBuildingCityCode , // 앞에 있는 City 
             'apartment' : apartment,
-            'serialNumber' : serialNumber
+            'serialNumber' : serialNumber,
+            'amountTo' : amountTo,
+            'amountFrom' : amountFrom,
+            'orderBy' : orderBy
         }
-        console.log(data);
+
         let results = await selectApart(data);
 
         return res.json({data: results});
+    }catch(err){
+        console.log(err);
+    }
+});
+
+/**
+ *  시세 정보 리스트 페이지에 따른 모든 아파트 개수와 페이지 수 
+ */
+const getTotalPage = (data) => {
+    return new Promise(async(resolve, reject) => {
+        const results = await selectApart(data);
+        resolve(results);
+    }).then((results) => {
+
+        totalCnt =  results.length;
+        console.log("totalCnt => " + totalCnt);
+        
+        totalPage = Math.round( totalCnt / pageLimit );
+    });
+}
+
+/**
+ * 시세 정보 리스트 페이지
+ * 1. 지역 / 아파트  / 날짜(현재 년월 - 202202)  
+ */
+ router.get('/:pageNum', async (req, res) => {
+    try{
+        let { pageNum } = req.params;
+
+        let {year, month, courtBuildingStateCode, courtBuildingCityCode, 
+            apartment, serialNumber, amountTo, amountFrom, orderBy} = req.body; 
+        
+        if(!year) year = -1;
+        if(!month) month = -1;
+        if(!courtBuildingStateCode) courtBuildingStateCode = -1; 
+        if(!courtBuildingCityCode) courtBuildingCityCode = -1; 
+        if(!apartment) apartment = null;
+        if(!serialNumber) serialNumber= -1;
+        if(!amountTo) amountTo = Number.MAX_VALUE;
+        if(!amountFrom) amountFrom = 1;
+        if(!orderBy) orderBy = "desc";
+
+        let data ={
+            'year' : year,
+            'month' : month,
+            'courtBuildingStateCode' : courtBuildingStateCode,
+            'courtBuildingCityCode' : courtBuildingCityCode , // 앞에 있는 City 
+            'apartment' : apartment,
+            'serialNumber' : serialNumber,
+            'amountTo' : amountTo,
+            'amountFrom' : amountFrom,
+            'orderBy' : orderBy
+        }
+        
+        getTotalPage(data)
+
+        let data1= {
+            'pageNum' : pageNum
+        };
+        Object.assign(data, data1);
+        console.log("selectApart => " + JSON.stringify(data));
+        results = await selectApart(data);
+        
+        return res.json({totalCnt : totalCnt, totalPage: totalPage, data: results});
     }catch(err){
         console.log(err);
     }
@@ -65,7 +147,7 @@ const  prevApart  = (data) => {
 
     if(prevApart.length > 0) {
         let apart = new apartItem(data.area, data.apartment, data.transactionAmount, ''.concat(year, month), 
-            Math.abs(parseInt(data.tranctionAmount) - parseInt(prevApart.tranctionAmount)));  
+            Math.abs(parseInt(data.transactionAmount) - parseInt(prevApart.transactionAmount)));  
         resolve(apart);
     }
     else { 
@@ -76,11 +158,14 @@ const  prevApart  = (data) => {
     }
 })
 }
+
+
 /**
  * 기본 시세 정보 리스트
- * 1. 지역 / 아파트 / 시세 / 날짜(현재 년월 - 202202) / 등락폭(이전 1, 3, 6, 12개월)
+ * 1. 등락폭(이전 1, 3, 6, 12개월)
  * 2. 디폴트는 리스트 정렬 등락폭 이전 달과 비교해서 가장 많이 오른 아파트 순 (50%)
- */
+ * 3. 좀 더 고민해야함 (시간이 너무 오래걸림.)
+
 router.get('/list', async (req, res) => {
      try{
         let {courtBuildingStateCode, courtBuildingCityCode, prev} = req.body; 
@@ -131,6 +216,7 @@ router.get('/list', async (req, res) => {
         console.log(err);
     }
 });
+ */
 
 /**
  * 거래 연도에 따른 cityStateCode 에 있는 아파트 저장
@@ -176,7 +262,7 @@ const insertApratmentByLawdCdAndDealYmd = async (lawdCd, dealYmd) =>{
         let results = await getApartment(pageNo, numOfRows, lawdCd, dealYmd);
         
         let totalCnt =results.response.body.totalCount._text; //.response.body.totalCount._text;
-        console.log("totalCnt" + totalCnt);
+        console.log("totalCnt => " + totalCnt);
        
         results = await getApartment(pageNo, totalCnt, lawdCd, dealYmd);
          
@@ -197,7 +283,7 @@ const insertApratmentByLawdCdAndDealYmd = async (lawdCd, dealYmd) =>{
                 'number':item.지번._text,       
                 'floor':item.층._text  
             };
-            console.log(data); 
+            //console.log(data); 
             insertApart(data);
         }) 
         return res.json({data: results});
@@ -250,6 +336,23 @@ const selectApart = (data) => {
         if(data.serialNumber != -1)
             query += "and serialNumber = '" + data.serialNumber + "'";
         
+        if(data.amountFrom && data.amountTo)
+            query += " and transactionAmount Between " + data.amountFrom + " and " + data.amountTo;
+
+        // 정렬
+        if(data.orderBy === "asc")
+            query += " order by transactionAmount asc";
+        else if(data.orderBy === "desc")
+            query += " order by transactionAmount desc";
+        else if(data.orderBy === "binary")
+            query += " order by binary(apartment)";
+
+        //page 에 따른 범위
+        if(data.pageNum){ 
+            let offset = data.pageNum == 1 ? 0 : (data.pageNum -1) * pageLimit;
+            console.log("offset => " + offset);
+            query += " limit " + pageLimit + " offset " + offset;
+        }
         query += ";";
         console.log(query);
         connection.query(query, function (err, results, fields) {
@@ -261,6 +364,8 @@ const selectApart = (data) => {
         });
     })
 }
+
+
 
 /**
  * db 에 apartment 저장
@@ -276,7 +381,7 @@ const insertApart = (data) => {
             var query = "INSERT INTO apartment ( " 
             + " transactionAmount, constructionYear, roadName, courtBuilding, courtBuildingCityCode, "   
             + "courtBuildingTownCode, apartment, year, month, day, serialNumber, area, number, floor "
-            +       ") VALUES ('" + data.transactionAmount + "' , '" + data.constructionYear + "' , '" + data.roadName + "' , '" + 
+            +       ") VALUES ( " + parseFloat(data.transactionAmount) + " , '" + data.constructionYear + "' , '" + data.roadName + "' , '" + 
             data.courtBuilding  + "' , '" + data.courtBuildingCityCode + "' , '" + data.courtBuildingTownCode + "' , '" +
             data.apartment + "' , '"+ data.year + "' , '" + data.month + "' , '" + data.day + "' , '" + data.serialNumber + "' , '"
             + data.area + "' , '" + data.number+ "' , '"+ data.floor +  "');";
